@@ -1,6 +1,11 @@
 <div class="flex h-screen"> 
 <!-- Users --> <div class="w-1/4 bg-gray-100 p-4"> 
-<h2 class="font-bold mb-2">Online Users</h2> 
+<h2 class="font-bold mb-2">
+  Online Users
+  <%= if @is_audience do %>
+    <span class="text-xs text-orange-500 font-normal">(you: audience)</span>
+  <% end %>
+</h2>
 <ul> 
   <%= for user <- @users do %> 
   <li class="text-green-600"><%= user %></li> 
@@ -25,6 +30,7 @@
 </div> 
 
 <!-- Input --> 
+<%= if not @is_audience do %>
 <form phx-submit="send" phx-change="update_message" class="p-4 flex gap-2"> 
 <input 
   name="message" 
@@ -45,6 +51,11 @@
       disabled={@remaining < 0 or @message == ""}
     > Send </button> 
 </div>
-</form> 
+</form>
+<% else %>
+  <div class="p-4 text-center text-gray-400 italic text-sm">
+    👀 You are in audience mode — room is full. You can read but not send messages.
+  </div>
+<% end %> 
 </div> 
 </div>

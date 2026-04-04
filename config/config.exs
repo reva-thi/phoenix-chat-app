@@ -7,9 +7,9 @@
 # General application configuration
 import Config
 
-config :chat_app,
-  ecto_repos: [ChatApp.Repo],
-  generators: [timestamp_type: :utc_datetime]
+# config :chat_app,
+#   ecto_repos: [ChatApp.Repo],
+#   generators: [timestamp_type: :utc_datetime]
 
 # Configure the endpoint
 config :chat_app, ChatAppWeb.Endpoint,
