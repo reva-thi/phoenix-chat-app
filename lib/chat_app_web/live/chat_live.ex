@@ -5,6 +5,7 @@ defmodule ChatAppWeb.ChatLive do
   alias ChatAppWeb.Presence 
   
   @topic "chat_room" 
+  @max_length 280
   
   def mount(params, _session, socket) do 
     username = params["username"] || "anon" 
@@ -21,21 +22,32 @@ defmodule ChatAppWeb.ChatLive do
       room: "general", 
       message: "", 
       messages: [], 
-      users: [] 
+      users: [],
+      remaining: @max_length
     )} 
   end 
   
   def handle_event("send", %{"message" => msg}, socket) do 
-    message = %{ 
-      user: socket.assigns.username, 
-      body: msg 
-    } 
+    if String.length(msg) <= @max_length and msg != "" do
+      message = %{ 
+        user: socket.assigns.username, 
+        body: msg 
+      } 
     PubSub.broadcast(ChatApp.PubSub, @topic, {:new_msg, message}) 
-      {:noreply, assign(socket, message: "")} 
+      {:noreply, 
+      assign(socket, message: "", remaining: @max_length)} 
+    else
+      {:noreply, socket}
+    end  
   end 
         
   def handle_event("update_message", %{"message" => msg}, socket) do 
-    {:noreply, assign(socket, message: msg)} 
+    remaining = @max_length - String.length(msg)
+    {:noreply, 
+    assign(socket, 
+    message: msg,
+    remaining: remaining
+    )} 
   end 
     
   def handle_info({:new_msg, message}, socket) do 
