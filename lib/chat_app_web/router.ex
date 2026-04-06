@@ -23,8 +23,9 @@ defmodule ChatAppWeb.Router do
   scope "/", ChatAppWeb do
     pipe_through :browser
 
-    live "/", JoinLive
-    live "/chat", ChatLive
+    live "/",     RoomListLive   # CHANGED — was JoinLive, now RoomListLive
+    live "/join", JoinLive       # NEW — join page separate route
+    live "/chat", ChatLive       # existing — don't touch
   end
 
   # Other scopes may use custom stacks.

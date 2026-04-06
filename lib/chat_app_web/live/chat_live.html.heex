@@ -1,61 +1,90 @@
-<div class="flex h-screen"> 
-<!-- Users --> <div class="w-1/4 bg-gray-100 p-4"> 
-<h2 class="font-bold mb-2">
-  Online Users
-  <%= if @is_audience do %>
-    <span class="text-xs text-orange-500 font-normal">(you: audience)</span>
-  <% end %>
-</h2>
-<ul> 
-  <%= for user <- @users do %> 
-  <li class="text-green-600"><%= user %></li> 
-<% end %> 
-</ul> 
-</div> 
-<!-- Chat --> 
-<div class="flex-1 flex flex-col"> 
-  <div class="bg-blue-500 text-white p-3 font-semibold"> 
-    Room: <%= @room %> 
-  </div> 
-<!-- Messages --> 
-<div class="flex-1 overflow-y-auto p-4"> 
-  <%= for msg <- @messages do %> 
-    <div class="mb-2">
-      <div class="bg-gray-200 px-3 py-2 rounded-lg max-w-md break-words whitespace-pre-wrap">
-      <span class="font-semibold"><%= msg.user %>:</span>
-      <span><%= msg.body %></span>
-    </div>
-  </div>
-  <% end %> 
-</div> 
+<div class="flex h-screen">
 
-<!-- Input --> 
-<%= if not @is_audience do %>
-<form phx-submit="send" phx-change="update_message" class="p-4 flex gap-2"> 
-<input 
-  name="message" 
-  value={@message} 
-  class="border p-2 flex-1" 
-  placeholder="Type message..." 
-/> 
-<!-- Bottom row: counter + button -->
-  <div class="flex justify-between items-center">
-    
-    <!-- Character Counter -->
-    <p class={@remaining < 0 && "text-red-500" || "text-gray-500"}>
-      Remaining: <%= @remaining %>
-    </p>
-<!-- Send Button -->
-<button
-      class="bg-blue-500 text-white px-4 py-2 disabled:opacity-50"
-      disabled={@remaining < 0 or @message == ""}
-    > Send </button> 
-</div>
-</form>
-<% else %>
-  <div class="p-4 text-center text-gray-400 italic text-sm">
-    👀 You are in audience mode — room is full. You can read but not send messages.
+  <!-- ===== LEFT: Users Panel ===== -->
+  <div class="w-1/4 bg-gray-100 p-4 flex flex-col">
+
+    <h2 class="font-bold mb-3 text-gray-700">
+      Online Users
+      <%= if @is_audience do %>
+        <span class="text-xs text-orange-500 font-normal block">
+          (you: audience)
+        </span>
+      <% end %>
+    </h2>
+
+    <ul class="flex-1">
+      <%= for user <- @users do %>
+        <li class="text-green-600 py-1 text-sm"><%= user %></li>
+      <% end %>
+    </ul>
+
   </div>
-<% end %> 
-</div> 
+  <!-- ===== END LEFT ===== -->
+
+
+  <!-- ===== RIGHT: Chat Panel ===== -->
+  <div class="flex-1 flex flex-col">
+
+    <!-- Header: Chat title left, Room name right -->
+    <div class="bg-blue-500 text-white p-3 flex justify-between items-center">
+      <span class="font-semibold">Chat</span>
+      <span class="text-sm bg-blue-600 px-3 py-1 rounded-full">
+        <%= String.capitalize(@room) %>
+      </span>
+    </div>
+
+    <!-- Messages — flex-1 means it fills remaining height -->
+    <div class="flex-1 overflow-y-auto p-4">
+      <%= for msg <- @messages do %>
+        <div class="mb-3">
+          <div class="bg-gray-200 px-3 py-2 rounded-lg max-w-md break-words whitespace-pre-wrap">
+            <span class="font-semibold text-gray-800"><%= msg.user %>: </span>
+            <span class="text-gray-700"><%= msg.body %></span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Input Area OR Audience Banner -->
+    <%= if not @is_audience do %>
+
+      <form phx-submit="send" phx-change="update_message" class="p-4 border-t flex flex-col gap-2">
+
+        <!-- Row 1: Text input -->
+        <input
+          name="message"
+          value={@message}
+          class="border border-gray-300 rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
+          placeholder="Type message..."
+        />
+
+        <!-- Row 2: Counter + Send button -->
+        <div class="flex justify-between items-center">
+
+          <p class={if @remaining < 0, do: "text-red-500 text-sm", else: "text-gray-400 text-sm"}>
+            <%= @remaining %> chars left
+          </p>
+
+          <button
+            class="bg-blue-500 text-white px-5 py-2 rounded disabled:opacity-40"
+            disabled={@remaining < 0 or @message == ""}
+          >
+            Send
+          </button>
+
+        </div>
+      </form>
+
+    <% else %>
+
+      <div class="p-4 text-center text-gray-400 italic text-sm border-t">
+        👀 You are in audience mode — room is full. You can read but not send messages.
+      </div>
+
+    <% end %>
+    <!-- ===== END Input Area ===== -->
+
+  </div>
+  <!-- ===== END RIGHT ===== -->
+
 </div>
