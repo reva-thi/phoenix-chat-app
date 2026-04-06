@@ -1,90 +1,127 @@
 <div class="flex h-screen">
 
-  <!-- ===== LEFT: Users Panel ===== -->
+  <!-- LEFT PANEL: Online users — members AND audience இருவருக்கும் காட்டு -->
   <div class="w-1/4 bg-gray-100 p-4 flex flex-col">
 
-    <h2 class="font-bold mb-3 text-gray-700">
-      Online Users
-      <%= if @is_audience do %>
-        <span class="text-xs text-orange-500 font-normal block">
-          (you: audience)
-        </span>
-      <% end %>
-    </h2>
+    <h2 class="font-bold mb-1 text-gray-700">Online Users</h2>
+
+    <!-- Show audience badge under heading -->
+    <%= if @is_audience do %>
+      <span class="text-xs text-orange-500 mb-3 block">
+        👀 You are audience
+      </span>
+    <% else %>
+      <span class="text-xs text-green-500 mb-3 block">
+        ✅ You are a member
+      </span>
+    <% end %>
 
     <ul class="flex-1">
       <%= for user <- @users do %>
-        <li class="text-green-600 py-1 text-sm"><%= user %></li>
+        <!-- Highlight current user in the list -->
+        <li class={
+          "py-1 text-sm flex items-center gap-1 " <>
+          if(user == @username, do: "text-blue-600 font-semibold", else: "text-green-600")
+        }>
+          <%= if user == @username do %>
+            <span>👤</span>
+          <% else %>
+            <span>•</span>
+          <% end %>
+          <%= user %>
+          <%= if user == @username do %>
+            <span class="text-xs text-gray-400">(you)</span>
+          <% end %>
+        </li>
       <% end %>
     </ul>
 
+    <!-- My info at bottom of left panel -->
+    <div class="border-t pt-3 mt-3">
+      <p class="text-xs text-gray-400">Logged in as</p>
+      <p class="text-sm font-semibold text-gray-700 truncate"><%= @username %></p>
+      <p class="text-xs text-gray-400 mt-1">Room: <%= String.capitalize(@room) %></p>
+    </div>
+
   </div>
-  <!-- ===== END LEFT ===== -->
 
-
-  <!-- ===== RIGHT: Chat Panel ===== -->
+  <!-- RIGHT PANEL: Chat -->
   <div class="flex-1 flex flex-col">
 
-    <!-- Header: Chat title left, Room name right -->
+    <!-- Header — username left side, room right side -->
     <div class="bg-blue-500 text-white p-3 flex justify-between items-center">
-      <span class="font-semibold">Chat</span>
+      <div class="flex items-center gap-2">
+        <span class="font-semibold">💬 Chat</span>
+        <span class="text-blue-200 text-sm">• <%= @username %></span>
+      </div>
       <span class="text-sm bg-blue-600 px-3 py-1 rounded-full">
-        <%= String.capitalize(@room) %>
+        🏠 <%= String.capitalize(@room) %>
       </span>
     </div>
 
-    <!-- Messages — flex-1 means it fills remaining height -->
+    <!-- Messages -->
     <div class="flex-1 overflow-y-auto p-4">
       <%= for msg <- @messages do %>
-        <div class="mb-3">
-          <div class="bg-gray-200 px-3 py-2 rounded-lg max-w-md break-words whitespace-pre-wrap">
-            <span class="font-semibold text-gray-800"><%= msg.user %>: </span>
-            <span class="text-gray-700"><%= msg.body %></span>
+        <div class={
+          "mb-3 flex " <>
+          if(msg.user == @username, do: "justify-end", else: "justify-start")
+        }>
+          <div class={
+            "px-3 py-2 rounded-lg max-w-sm break-words whitespace-pre-wrap " <>
+            if(msg.user == @username, do: "bg-blue-500 text-white", else: "bg-gray-200 text-gray-800")
+          }>
+            <!-- Show sender name only for others' messages -->
+            <%= if msg.user != @username do %>
+              <p class="text-xs font-semibold text-gray-500 mb-1"><%= msg.user %></p>
+            <% end %>
+            <span><%= msg.body %></span>
           </div>
         </div>
       <% end %>
     </div>
 
-    <!-- Input Area OR Audience Banner -->
+    <!-- Typing indicator — audience-க்கும் காட்டு -->
+    <%= if map_size(@typing_users) > 0 do %>
+      <% users = Map.keys(@typing_users) %>
+      <p class="text-sm text-gray-500 italic px-4 pb-2">
+        <%= if length(users) == 1 do %>
+          <%= hd(users) %> is typing...
+        <% else %>
+          <%= Enum.join(users, ", ") %> are typing...
+        <% end %>
+      </p>
+    <% end %>
+
+    <!-- Input OR Audience banner -->
     <%= if not @is_audience do %>
-
       <form phx-submit="send" phx-change="update_message" class="p-4 border-t flex flex-col gap-2">
-
-        <!-- Row 1: Text input -->
         <input
           name="message"
           value={@message}
           class="border border-gray-300 rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
           placeholder="Type message..."
         />
-
-        <!-- Row 2: Counter + Send button -->
         <div class="flex justify-between items-center">
-
           <p class={if @remaining < 0, do: "text-red-500 text-sm", else: "text-gray-400 text-sm"}>
             <%= @remaining %> chars left
           </p>
-
           <button
             class="bg-blue-500 text-white px-5 py-2 rounded disabled:opacity-40"
             disabled={@remaining < 0 or @message == ""}
           >
             Send
           </button>
-
         </div>
       </form>
-
     <% else %>
-
-      <div class="p-4 text-center text-gray-400 italic text-sm border-t">
-        👀 You are in audience mode — room is full. You can read but not send messages.
+      <div class="p-4 border-t">
+        <div class="text-center text-gray-400 italic text-sm bg-orange-50 border border-orange-200 rounded-lg py-3">
+          👀 You are in audience mode — room is full.
+          <br/>
+          <span class="text-xs">You can read messages and see who is typing.</span>
+        </div>
       </div>
-
     <% end %>
-    <!-- ===== END Input Area ===== -->
 
   </div>
-  <!-- ===== END RIGHT ===== -->
-
 </div>
