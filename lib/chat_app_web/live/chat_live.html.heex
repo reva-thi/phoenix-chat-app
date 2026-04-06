@@ -29,6 +29,18 @@
   <% end %> 
 </div> 
 
+<!-- typing Indicator -->
+<%= if map_size(@typing_users) > 0 do %>
+  <% users = Map.keys(@typing_users) %>
+  <p class="text-sm text-gray-500 italic px-4 pb-2">
+    <%= if length(users) == 1 do %>
+      <%= hd(users) %> is typing...
+    <% else %>
+      <%= Enum.join(users, ", ") %> are typing...
+    <% end %>
+  </p>
+<% end %>
+
 <!-- Input --> 
 <%= if not @is_audience do %>
 <form phx-submit="send" phx-change="update_message" class="p-4 flex gap-2"> 

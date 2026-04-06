@@ -25,6 +25,7 @@ defmodule ChatAppWeb.Router do
 
     live "/", JoinLive
     live "/chat", ChatLive
+    get "/save_session", SessionController, :save
   end
 
   # Other scopes may use custom stacks.

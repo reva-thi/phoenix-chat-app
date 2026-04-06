@@ -77,7 +77,7 @@ defmodule ChatAppWeb.JoinLive do
   def handle_event("join", %{"username" => name}, socket) do
     unique_id = :rand.uniform(9999)
     unique_name = "#{name}-#{unique_id}"
-    {:noreply, push_navigate(socket, to: "/chat?username=#{unique_name}")}
+    {:noreply, push_redirect(socket, to: "/save_session?username=#{unique_name}&room=general")}
   end
 
   def render(assigns) do
