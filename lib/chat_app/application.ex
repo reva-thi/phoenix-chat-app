@@ -7,6 +7,11 @@ defmodule ChatApp.Application do
 
   @impl true
   def start(_type, _args) do
+    # Create ETS table only if not exists
+    if :ets.whereis(:chat_messages) == :undefined do
+      :ets.new(:chat_messages, [:named_table, :public, :ordered_set])
+    end
+
     children = [
       ChatAppWeb.Telemetry,
       #ChatApp.Repo,

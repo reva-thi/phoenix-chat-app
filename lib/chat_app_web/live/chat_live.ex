@@ -51,7 +51,13 @@ defmodule ChatAppWeb.ChatLive do
        room:         room,         # "lobby", "tamil", or "gaming"
        topic:        topic,        # "room:lobby" etc — used for PubSub
        message:      "",           # current text in input box
-       messages:     [],           # list of all chat messages
+       messages:
+          :ets.tab2list(:chat_messages)
+          |> Enum.filter(fn {_id, msg_room, _msg} ->
+            msg_room == room
+          end)
+          |> Enum.sort()
+          |> Enum.map(fn {_id, _room, msg} -> msg end),       
        users:        [],           # list of online usernames
        remaining:    @max_length,  # characters left to type
        is_audience:  is_audience,  # true = read only, false = can send
@@ -74,6 +80,13 @@ defmodule ChatAppWeb.ChatLive do
         user: socket.assigns.username,
         body: msg
       }
+
+      # STORE IN ETS
+      :ets.insert(:chat_messages, {
+        System.unique_integer([:positive]), 
+        socket.assigns.room,
+        message
+        })
 
       # Broadcast this message to everyone in the same room topic
       PubSub.broadcast(ChatApp.PubSub, socket.assigns.topic, {:new_msg, message})
