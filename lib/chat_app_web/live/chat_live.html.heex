@@ -60,21 +60,34 @@
     </div>
 
     <!-- Messages -->
-    <div class="flex-1 overflow-y-auto p-4">
+    <div class="flex-1 overflow-y-auto p-2">
       <%= for msg <- @messages do %>
         <div class={
-          "mb-3 flex " <>
+          "mb-1 flex " <>
           if(msg.user == @username, do: "justify-end", else: "justify-start")
         }>
           <div class={
-            "px-3 py-2 rounded-lg max-w-sm break-words whitespace-pre-wrap " <>
-            if(msg.user == @username, do: "bg-blue-500 text-white", else: "bg-gray-200 text-gray-800")
-          }>
+  "px-3 py-2 rounded-lg max-w-xs text-sm break-words " <>
+  cond do
+    # Private tagged message — yellow background
+    msg.tagged != nil        -> "bg-yellow-100 border border-yellow-400 text-gray-800"
+    # My own message — blue
+    msg.user == @username    -> "bg-blue-500 text-white"
+    # Others message — gray
+    true                     -> "bg-gray-200 text-gray-800"
+  end
+}>
+  <%= if msg.tagged != nil do %>
+    <p class="text-xs text-yellow-700 font-semibold mb-1">
+      🔔 Private from <%= msg.user %>
+    </p>
+  <% end %>
             <!-- Show sender name only for others' messages -->
             <%= if msg.user != @username do %>
               <p class="text-xs font-semibold text-gray-500 mb-1"><%= msg.user %></p>
             <% end %>
-            <span><%= msg.body %></span>
+            <%# raw() renders HTML — so @username shows as blue span, not plain text %>
+            <%= raw highlight_mentions(msg.body) %>
           </div>
         </div>
       <% end %>
@@ -99,8 +112,32 @@
           name="message"
           value={@message}
           class="border border-gray-300 rounded p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder="Type message..."
+          placeholder="Type message... use @username to tag someone"
         />
+        <!-- @ mention popup — only shows when user types @something -->
+<%= if length(@mention_suggestions) > 0 do %>
+  <div class="border border-gray-200 rounded-lg shadow-lg bg-white overflow-hidden">
+
+    <p class="text-xs text-gray-400 px-3 pt-2 pb-1">
+      Tap a name to tag them:
+    </p>
+
+    <%= for suggestion <- @mention_suggestions do %>
+      <button
+        type="button"
+        phx-click="select_mention"
+        phx-value-username={suggestion}
+        class="w-full text-left px-3 py-2 hover:bg-blue-50 flex items-center gap-2 border-t border-gray-100"
+      >
+        <!-- Green dot — online indicator -->
+        <span class="w-2 h-2 bg-green-400 rounded-full inline-block"></span>
+        <span class="text-sm text-gray-700 font-medium"><%= suggestion %></span>
+        <span class="text-xs text-gray-400 ml-auto">click to tag</span>
+      </button>
+    <% end %>
+
+  </div>
+<% end %>
         <div class="flex justify-between items-center">
           <p class={if @remaining < 0, do: "text-red-500 text-sm", else: "text-gray-400 text-sm"}>
             <%= @remaining %> chars left
