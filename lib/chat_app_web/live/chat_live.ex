@@ -344,13 +344,16 @@ defmodule ChatAppWeb.ChatLive do
          String.length(msg) <= @max_length and
          msg != "" do
 
+        # ✅ Extract tagged user FIRST
+      tagged_username = extract_tagged_user(msg, socket.assigns.users)
+
       # ---------------------------------------------------------
       # | FIXED SECTION START                                   |
       # ---------------------------------------------------------
       message = %{
         user: socket.assigns.username,
         body: msg,
-        tagged: nil
+        tagged: tagged_username
       }
 
       # STORE IN ETS
