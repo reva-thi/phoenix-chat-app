@@ -2,7 +2,7 @@ defmodule ChatAppWeb.JoinLive do
   use ChatAppWeb, :live_view
   alias ChatAppWeb.Presence
 
-  @max_members 3
+  @max_members 5
 
   @rooms [
     %{id: "lobby",  name: "Lobby",  emoji: "🏠"},
