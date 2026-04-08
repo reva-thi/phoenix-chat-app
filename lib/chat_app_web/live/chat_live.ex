@@ -474,7 +474,7 @@ defmodule ChatAppWeb.ChatLive do
     |> Enum.find(fn name -> Enum.member?(users, name) end)
   end
 
-  defp highlight_mentions(text) do
+  def highlight_mentions(text) do
     Regex.replace(~r/@(\S+)/, text, fn match, _name ->
       "<span class='font-bold text-blue-600'>#{match}</span>"
     end)
